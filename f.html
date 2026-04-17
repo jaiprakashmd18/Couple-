@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Singularity</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body { margin: 0; background: radial-gradient(circle at center, #0a0f1d 0%, #01040a 100%); overflow: hidden; }
+        
+        .nerve-path { filter: drop-shadow(0 0 2px rgba(139, 92, 246, 0.5)); }
+
+        /* The 'Synapse' firing point */
+        .synapse-node {
+            box-shadow: 0 0 15px #22d3ee;
+            animation: pulse-node 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse-node {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.5); }
+        }
+
+        /* Chromatic Aberration on Hover */
+        .brain-core:hover {
+            text-shadow: 2px 0 #ff00c1, -2px 0 #00fff9;
+            filter: contrast(1.2) brightness(1.2);
+        }
+
+        /* Scanning line effect over the brain */
+        .scanline {
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(34, 211, 238, 0.2), transparent);
+            position: absolute;
+            animation: scan 3s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { top: -10%; }
+            100% { top: 110%; }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { motion } = window.Motion;
+
+        const PulseBeams = ({ children, beams }) => {
+            const colors = { start: "#06b6d4", middle: "#8b5cf6", end: "#d946ef" };
+
+            return (
+                <div className="w-full h-screen relative flex items-center justify-center overflow-hidden">
+                    {/* Background Noise / Tiny Stars to simulate deep brain space */}
+                    <div className="absolute inset-0 opacity-10 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]" />
+
+                    <div className="relative z-30">{children}</div>
+                    
+                    <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+                        <svg width="100%" height="100%" viewBox="0 0 1000 800" fill="none" preserveAspectRatio="xMidYMid slice">
+                            <defs>
+                                {beams.map((_, i) => (
+                                    <motion.linearGradient
+                                        key={i}
+                                        id={`singularityGrad${i}`}
+                                        gradientUnits="userSpaceOnUse"
+                                        initial={{ x1: "0%", x2: "0%", y1: "0%", y2: "0%" }}
+                                        animate={{ 
+                                            x1: ["0%", "100%"], 
+                                            x2: ["-15%", "115%"],
+                                            y1: ["0%", "100%"],
+                                            y2: ["0%", "100%"]
+                                        }}
+                                        transition={{ 
+                                            duration: 1.8 + Math.random(), 
+                                            repeat: Infinity, 
+                                            ease: "easeInOut",
+                                            delay: Math.random() * 5 
+                                        }}
+                                    >
+                                        <stop offset="0%" stopColor={colors.start} stopOpacity="0" />
+                                        <stop offset="50%" stopColor={colors.middle} stopOpacity="1" />
+                                        <stop offset="100%" stopColor={colors.end} stopOpacity="0" />
+                                    </motion.linearGradient>
+                                ))}
+                            </defs>
+
+                            {beams.map((beam, index) => (
+                                <React.Fragment key={index}>
+                                    {/* Main Nerve Path */}
+                                    <path 
+                                        d={beam.path} 
+                                        stroke={`url(#singularityGrad${index})`} 
+                                        strokeWidth="2.5" 
+                                        fill="none" 
+                                        className="nerve-path opacity-80" 
+                                    />
+                                    {/* Glowing Synapse Terminal at the end of the path */}
+                                    <motion.circle 
+                                        cx={beam.endX} cy={beam.endY} r="2" 
+                                        fill="#22d3ee" 
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: [0, 1, 0] }}
+                                        transition={{ duration: 2, repeat: Infinity, delay: Math.random() * 2 }}
+                                    />
+                                </React.Fragment>
+                            ))}
+                        </svg>
+                    </div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            React.useEffect(() => { lucide.createIcons(); }, []);
+
+            const paths = [
+                { path: "M 500,400 C 400,200 200,300 50,50", endX: 50, endY: 50 },
+                { path: "M 500,400 C 600,200 800,300 950,50", endX: 950, endY: 50 },
+                { path: "M 500,400 C 450,600 250,700 80,750", endX: 80, endY: 750 },
+                { path: "M 500,400 C 550,600 750,700 920,750", endX: 920, endY: 750 },
+                { path: "M 500,400 C 300,400 100,450 30,420", endX: 30, endY: 420 },
+                { path: "M 500,400 C 700,400 900,450 970,420", endX: 970, endY: 420 },
+                { path: "M 500,400 C 520,200 480,100 500,20", endX: 500, endY: 20 },
+                { path: "M 500,400 C 480,600 520,700 500,780", endX: 500, endY: 780 }
+            ];
+
+            return (
+                <PulseBeams beams={paths}>
+                    <button 
+                        onClick={() => window.location.href = "cards.html"}
+                        className="relative group w-48 h-48 flex items-center justify-center outline-none"
+                    >
+                        {/* Orbiting Particle Rings */}
+                        <div className="absolute inset-0 border border-cyan-500/10 rounded-full scale-150 animate-[spin_10s_linear_infinite]" />
+                        <div className="absolute inset-0 border border-violet-500/10 rounded-full scale-125 animate-[spin_6s_linear_infinite_reverse]" />
+                        
+                        {/* The Singularity Soma */}
+                        <div className="brain-core relative w-full h-full bg-[#020612]/90 border border-white/5 rounded-full flex flex-col items-center justify-center overflow-hidden shadow-[0_0_80px_rgba(34,211,238,0.1)] group-hover:shadow-[0_0_100px_rgba(139,92,246,0.3)] group-hover:border-cyan-500/40 transition-all duration-700">
+                            <div className="scanline" />
+                            <i data-lucide="brain" className="w-24 h-24 text-cyan-400/80 group-hover:text-cyan-100 transition-colors duration-500 mb-1 drop-shadow-[0_0_10px_rgba(34,211,238,0.5)]"></i>
+                            <span className="text-[10px] font-black tracking-[0.4em] text-cyan-300/40 group-hover:text-white uppercase">
+                                Sync
+                            </span>
+                        </div>
+                    </button>
+                </PulseBeams>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
